@@ -4,9 +4,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.bugstack.infrastructure.persistent.dto.IStrategyAwardDao">
 
-    <resultMap id="BaseResultMap" type="generator.persistent.po.StrategyAward">
+    <resultMap id="BaseResultMap" type="cn.bugstack.infrastructure.persistent.po.StrategyAward">
             <id property="id" column="id" jdbcType="INTEGER"/>
-            <result property="strategyId" column="strategy_id" jdbcType="INTEGER"/>
+            <result property="strategyId" column="strategy_id" jdbcType="BIGINT"/>
             <result property="awardId" column="award_id" jdbcType="INTEGER"/>
             <result property="awardTitle" column="award_title" jdbcType="VARCHAR"/>
             <result property="awardSubtitle" column="award_subtitle" jdbcType="VARCHAR"/>
@@ -19,10 +19,16 @@
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,strategy_id,award_id,
-        award_title,award_subtitle,award_count,
-        award_count_surplus,award_rate,rule_models,
-        sort,create_time,update_time
-    </sql>
+<!--    <sql id="Base_Column_List">-->
+<!--        id,strategy_id,award_id,-->
+<!--        award_title,award_subtitle,award_count,-->
+<!--        award_count_surplus,award_rate,rule_models,-->
+<!--        sort,create_time,update_time-->
+<!--    </sql>-->
+
+    <select id="queryStrategyAwardListByStrategyId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select strategy_id, award_id, award_count, award_count_surplus, award_rate
+        from strategy_award
+        where strategy_id = #{strategy_id}
+    </select>
 </mapper>

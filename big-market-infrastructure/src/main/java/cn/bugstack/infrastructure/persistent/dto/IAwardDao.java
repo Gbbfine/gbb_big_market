@@ -1,6 +1,7 @@
 package cn.bugstack.infrastructure.persistent.dto;
 
 import cn.bugstack.infrastructure.persistent.po.Award;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -12,6 +13,6 @@ import java.util.List;
  * @Description:
  */
 @Mapper
-public interface IAwardDao {
+public interface IAwardDao extends BaseMapper<Award> {
     List<Award> queryAwardList();
 }

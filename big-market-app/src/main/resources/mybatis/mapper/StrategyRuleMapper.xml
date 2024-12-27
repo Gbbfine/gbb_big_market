@@ -4,9 +4,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.bugstack.infrastructure.persistent.dto.IStrategyRuleDao">
 
-    <resultMap id="BaseResultMap" type="generator.persistent.po.StrategyRule">
+    <resultMap id="BaseResultMap" type="cn.bugstack.infrastructure.persistent.po.StrategyRule">
             <id property="id" column="id" jdbcType="INTEGER"/>
-            <result property="strategyId" column="strategy_id" jdbcType="INTEGER"/>
+            <result property="strategyId" column="strategy_id" jdbcType="BIGINT"/>
             <result property="awardId" column="award_id" jdbcType="INTEGER"/>
             <result property="ruleType" column="rule_type" jdbcType="INTEGER"/>
             <result property="ruleModel" column="rule_model" jdbcType="VARCHAR"/>

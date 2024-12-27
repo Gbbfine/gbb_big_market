@@ -3,6 +3,7 @@ package cn.bugstack.test.infrastructure;
 import cn.bugstack.infrastructure.persistent.dto.IAwardDao;
 import cn.bugstack.infrastructure.persistent.po.Award;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,5 +35,12 @@ public class AwardDaoTest {
         log.info("测试结果:{}", JSON.toJSONString(awards));
         log.info("测试结果:{}", JSON.toJSONString(awards));
 
+    }
+
+    @Test
+    public void queryMapperTest(){
+        LambdaQueryWrapper<Award> queryWrapper = new LambdaQueryWrapper<>();
+        List<Award> awards = awardDao.selectList(queryWrapper);
+        log.info("测试结果：{}",awards);
     }
 }

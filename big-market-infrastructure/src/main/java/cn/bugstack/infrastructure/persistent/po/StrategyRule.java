@@ -26,7 +26,7 @@ public class StrategyRule extends Object implements Serializable {
      * 抽奖策略ID
      */
     @TableField(value = "strategy_id")
-    private Integer strategyId;
+    private Long strategyId;
 
     /**
      * 抽奖奖品ID
