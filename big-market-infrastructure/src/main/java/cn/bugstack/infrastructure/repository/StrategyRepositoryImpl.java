@@ -130,4 +130,26 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
         return strategyRuleEntity;
 
     }
+
+    /**
+     * 查询抽奖策略对应的规则值 100:user001,user002,user003
+     * @param strategyId
+     * @param awardId
+     * @param ruleModel
+     * @return
+     */
+    @Override
+    public String queryStrategyRuleValue(Long strategyId, Integer awardId, String ruleModel) {
+        LambdaQueryWrapper<StrategyRule> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StrategyRule::getStrategyId, strategyId)
+                .eq(StrategyRule::getRuleModel, ruleModel);
+        if (awardId == null) {
+            queryWrapper.isNull(StrategyRule::getAwardId);
+        } else {
+            queryWrapper.eq(StrategyRule::getAwardId, awardId);
+        }
+        StrategyRule strategyRule = strategyRuleDao.selectOne(queryWrapper);
+        String ruleValue = strategyRule.getRuleValue();
+        return ruleValue;
+    }
 }
