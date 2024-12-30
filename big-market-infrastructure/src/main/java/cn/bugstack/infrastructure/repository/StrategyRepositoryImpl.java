@@ -3,6 +3,7 @@ package cn.bugstack.infrastructure.repository;
 import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
+import cn.bugstack.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.infrastructure.persistent.dto.IStrategyAwardDao;
 import cn.bugstack.infrastructure.persistent.dto.IStrategyDao;
@@ -151,5 +152,16 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
         StrategyRule strategyRule = strategyRuleDao.selectOne(queryWrapper);
         String ruleValue = strategyRule.getRuleValue();
         return ruleValue;
+    }
+
+    @Override
+    public StrategyAwardRuleModelVO queryStrategyAwardRuleModel(Long strategyId, Integer awardId) {
+        StrategyAwardRuleModelVO strategyAwardRuleModelVO = new StrategyAwardRuleModelVO();
+        LambdaQueryWrapper<StrategyAward> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StrategyAward::getStrategyId, strategyId)
+                .eq(StrategyAward::getAwardId,awardId);
+        StrategyAward strategyAward = strategyAwardDao.selectOne(queryWrapper);
+        BeanUtils.copyProperties(strategyAward, strategyAwardRuleModelVO);
+        return strategyAwardRuleModelVO;
     }
 }
