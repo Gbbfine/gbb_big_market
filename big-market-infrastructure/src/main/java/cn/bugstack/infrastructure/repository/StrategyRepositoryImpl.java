@@ -132,6 +132,11 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
 
     }
 
+    @Override
+    public String queryStrategyRuleValue(Long strategyId, String ruleModel) {
+        return queryStrategyRuleValue(strategyId, null, ruleModel);
+    }
+
     /**
      * 查询抽奖策略对应的规则值 100:user001,user002,user003
      * @param strategyId

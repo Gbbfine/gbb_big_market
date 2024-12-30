@@ -1,6 +1,6 @@
 package cn.bugstack.domain.strategy.model.vo;
 
-import cn.bugstack.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bugstack.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bugstack.types.common.Constants;
 import lombok.*;
 
