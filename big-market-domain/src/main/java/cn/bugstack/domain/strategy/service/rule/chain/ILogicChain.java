@@ -1,5 +1,7 @@
 package cn.bugstack.domain.strategy.service.rule.chain;
 
+import cn.bugstack.domain.strategy.service.rule.factory.DefaultChainFactory;
+
 /**
  * @Author: GBB
  * @Date: 2024/12/30
@@ -15,5 +17,5 @@ public interface ILogicChain extends ILogicChainArmory{
      * @param strategyId
      * @return
      */
-    Integer Logic(String userId, Long strategyId);
+    DefaultChainFactory.StrategyAwardVO Logic(String userId, Long strategyId);
 }

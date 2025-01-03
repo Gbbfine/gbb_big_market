@@ -3,14 +3,10 @@ package cn.bugstack.infrastructure.repository;
 import cn.bugstack.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyEntity;
 import cn.bugstack.domain.strategy.model.entity.StrategyRuleEntity;
-import cn.bugstack.domain.strategy.model.vo.StrategyAwardRuleModelVO;
+import cn.bugstack.domain.strategy.model.vo.*;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
-import cn.bugstack.infrastructure.persistent.dto.IStrategyAwardDao;
-import cn.bugstack.infrastructure.persistent.dto.IStrategyDao;
-import cn.bugstack.infrastructure.persistent.dto.IStrategyRuleDao;
-import cn.bugstack.infrastructure.persistent.po.Strategy;
-import cn.bugstack.infrastructure.persistent.po.StrategyAward;
-import cn.bugstack.infrastructure.persistent.po.StrategyRule;
+import cn.bugstack.infrastructure.persistent.dto.*;
+import cn.bugstack.infrastructure.persistent.po.*;
 import cn.bugstack.infrastructure.redis.IRedisService;
 import cn.bugstack.types.common.Constants;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -44,6 +40,14 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
 
     @Resource
     private IRedisService redisService;
+
+    @Resource
+    private IRuleTreeDao ruleTreeDao;
+
+    @Resource
+    private IRuleTreeNodeDao ruleTreeNodeDao;
+
+    @Resource IRuleTreeNodeLineDao ruleTreeNodeLineDao;
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
@@ -160,7 +164,7 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
     }
 
     @Override
-    public StrategyAwardRuleModelVO queryStrategyAwardRuleModel(Long strategyId, Integer awardId) {
+    public StrategyAwardRuleModelVO queryStrategyAwardRuleModelVO(Long strategyId, Integer awardId) {
         StrategyAwardRuleModelVO strategyAwardRuleModelVO = new StrategyAwardRuleModelVO();
         LambdaQueryWrapper<StrategyAward> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(StrategyAward::getStrategyId, strategyId)
@@ -168,5 +172,77 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
         StrategyAward strategyAward = strategyAwardDao.selectOne(queryWrapper);
         BeanUtils.copyProperties(strategyAward, strategyAwardRuleModelVO);
         return strategyAwardRuleModelVO;
+    }
+
+    @Override
+    public RuleTreeVO queryRuleTreeVOByTreeId(String treeId) {
+
+        //先从redis查询是否有缓存
+        String cacheKey = Constants.RedisKey.RULE_TREE_VO_KEY + treeId;
+        RuleTreeVO RuleTreeVOCache = redisService.getValue(cacheKey);
+        if(null != RuleTreeVOCache)
+            return RuleTreeVOCache;
+
+        // 为了组装规则树的VO对象，需要从数据库查询所有的PO对象，然后组装
+        //ruleTree
+        LambdaQueryWrapper<RuleTree> ruleTreeQueryWrapper = new LambdaQueryWrapper<>();
+        ruleTreeQueryWrapper.eq(RuleTree::getTreeId, treeId);
+        RuleTree ruleTree = ruleTreeDao.selectOne(ruleTreeQueryWrapper);
+        //ruleTreeNodes
+        LambdaQueryWrapper<RuleTreeNode> ruleTreeNodeQueryWrapper = new LambdaQueryWrapper<>();
+        ruleTreeNodeQueryWrapper.eq(RuleTreeNode::getTreeId, treeId);
+        List<RuleTreeNode> ruleTreeNodes = ruleTreeNodeDao.selectList(ruleTreeNodeQueryWrapper);
+        //ruleTreeNodeLines
+        LambdaQueryWrapper<RuleTreeNodeLine> ruleTreeNodeLineQueryWrapper = new LambdaQueryWrapper<>();
+        ruleTreeNodeLineQueryWrapper.eq(RuleTreeNodeLine::getTreeId,treeId);
+        List<RuleTreeNodeLine> ruleTreeNodeLines = ruleTreeNodeLineDao.selectList(ruleTreeNodeLineQueryWrapper);
+
+        //1. tree node line转换为Map结构
+        HashMap<String, List<RuleTreeNodeLineVO>> ruleTreeNodeLineMap = new HashMap<>();
+
+        // 为了后续构造RuleTreeVO，把查出来的数据库PO对象一个一个对应转换为VO对象
+        for (RuleTreeNodeLine ruleTreeNodeLine : ruleTreeNodeLines) {
+            RuleTreeNodeLineVO ruleTreeNodeLineVO = RuleTreeNodeLineVO.builder()
+                    .treeId(ruleTreeNodeLine.getTreeId())
+                    .ruleNodeFrom(ruleTreeNodeLine.getRuleNodeFrom())
+                    .ruleNodeTo(ruleTreeNodeLine.getRuleNodeTo())
+                    .ruleLimitType(RuleLimitTypeVO.valueOf(ruleTreeNodeLine.getRuleLimitType()))
+                    .ruleLimitValue(RuleLogicCheckTypeVO.valueOf(ruleTreeNodeLine.getRuleLimitValue()))
+                    .build();
+
+            // 把每条连线的from节点装入map，所以根据库节点的String key就能获取到连线的集合
+            List<RuleTreeNodeLineVO> ruleTreeNodeVOList = ruleTreeNodeLineMap.computeIfAbsent(ruleTreeNodeLine.getRuleNodeFrom(), k -> new ArrayList<>());
+            // 把连线VO实体装入列表，方便后续取用
+            ruleTreeNodeVOList.add(ruleTreeNodeLineVO);
+        }
+
+        //2. tree node转换为map
+        HashMap<String, RuleTreeNodeVO> treeNodeMap = new HashMap<>();
+        // 为了后续构造RuleTreeVO，把查出来的数据库PO对象一个一个对应转换为VO对象
+        for (RuleTreeNode ruleTreeNode : ruleTreeNodes) {
+            RuleTreeNodeVO ruleTreeNodeVO = RuleTreeNodeVO.builder()
+                    .treeId(ruleTreeNode.getTreeId())
+                    .ruleKey(ruleTreeNode.getRuleKey())
+                    .ruleDesc(ruleTreeNode.getRuleDesc())
+                    .ruleValue(ruleTreeNode.getRuleValue())
+                    .treeNodeLineVOList(ruleTreeNodeLineMap.get(ruleTreeNode.getRuleKey()))
+                    .build();
+
+            treeNodeMap.put(ruleTreeNode.getRuleKey(),ruleTreeNodeVO);
+        }
+
+        //3. 组装RuleTreeVO
+        RuleTreeVO ruleTreeVODB = RuleTreeVO.builder()
+                .treeId(ruleTree.getTreeId())
+                .treeName(ruleTree.getTreeName())
+                .treeDesc(ruleTree.getTreeDesc())
+                .treeRootRuleNode(ruleTree.getTreeNodeRuleKey())
+                .treeNodeMap(treeNodeMap)
+                .build();
+
+        // 将RuleTreeVO存入缓存
+        redisService.setValue(cacheKey, ruleTreeVODB);
+
+        return ruleTreeVODB;
     }
 }

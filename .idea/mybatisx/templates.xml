@@ -68,20 +68,16 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="Award" />
-                  <option name="tableName" value="award" />
+                  <option name="className" value="RuleTree" />
+                  <option name="tableName" value="rule_tree" />
                 </TableUIInfo>
                 <TableUIInfo>
-                  <option name="className" value="Strategy" />
-                  <option name="tableName" value="strategy" />
+                  <option name="className" value="RuleTreeNode" />
+                  <option name="tableName" value="rule_tree_node" />
                 </TableUIInfo>
                 <TableUIInfo>
-                  <option name="className" value="StrategyAward" />
-                  <option name="tableName" value="strategy_award" />
-                </TableUIInfo>
-                <TableUIInfo>
-                  <option name="className" value="StrategyRule" />
-                  <option name="tableName" value="strategy_rule" />
+                  <option name="className" value="RuleTreeNodeLine" />
+                  <option name="tableName" value="rule_tree_node_line" />
                 </TableUIInfo>
               </list>
             </option>

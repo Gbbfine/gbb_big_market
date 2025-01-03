@@ -3,6 +3,7 @@ package cn.bugstack.domain.strategy.service.rule.chain.impl;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.domain.strategy.service.armory.IStrategyDispatch;
 import cn.bugstack.domain.strategy.service.rule.chain.AbstractLogicChain;
+import cn.bugstack.domain.strategy.service.rule.factory.DefaultChainFactory;
 import cn.bugstack.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ public class RuleWeightLogicChainImpl extends AbstractLogicChain {
      */
 
     @Override
-    public Integer Logic(String userId, Long strategyId) {
+    public DefaultChainFactory.StrategyAwardVO Logic(String userId, Long strategyId) {
         log.info("抽奖责任链-权重开始 userId: {} strategyId: {} ruleModel: {}", userId, strategyId, ruleModel());
         String ruleValue = repository.queryStrategyRuleValue(strategyId, ruleModel());
         // 1. 根据用户ID查询用户抽奖消耗的积分值，本章节我们先写死为固定的值。后续需要从数据库中查询。
@@ -58,7 +59,10 @@ public class RuleWeightLogicChainImpl extends AbstractLogicChain {
         if (null != nextValue) {
             Integer awardId = strategyDispatch.getRandomAwardId(strategyId, analyticalValueGroup.get(nextValue));
             log.info("抽奖责任链-权重接管 userId: {} strategyId: {} ruleModel: {} awardId: {}", userId, strategyId, ruleModel(), awardId);
-            return awardId;
+            return DefaultChainFactory.StrategyAwardVO.builder()
+                    .awardId(awardId)
+                    .logicModel(ruleModel())
+                    .build();
         }
         //过滤其他责任链
         log.info("抽奖责任链-权重放行 userId: {} strategyId: {} ruleModel: {}", userId, strategyId, ruleModel());
@@ -67,7 +71,7 @@ public class RuleWeightLogicChainImpl extends AbstractLogicChain {
 
     @Override
     protected String ruleModel() {
-        return "rule_weight";
+        return DefaultChainFactory.LogicModel.RULE_WEIGHT.getCode();
     }
 
     private Map<Long, String> getAnalyticalValue(String ruleValue) {

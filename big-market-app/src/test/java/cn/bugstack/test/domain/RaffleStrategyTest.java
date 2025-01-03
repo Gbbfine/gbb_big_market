@@ -48,8 +48,9 @@ public class RaffleStrategyTest {
     @Before
     public void setUp() {
         log.info("测试结果：{}",strategyArmory.assembleLotteryStrategy(100001L));
-        log.info("测试结果：{}",strategyArmory.assembleLotteryStrategy(100002L));
-        log.info("测试结果：{}",strategyArmory.assembleLotteryStrategy(100003L));
+//        log.info("测试结果：{}",strategyArmory.assembleLotteryStrategy(100002L));
+//        log.info("测试结果：{}",strategyArmory.assembleLotteryStrategy(100003L));
+        log.info("测试结果：{}",strategyArmory.assembleLotteryStrategy(100006L));
         ReflectionTestUtils.setField(ruleWeightLogicChain, "userScore", 45000L);
         ReflectionTestUtils.setField(ruleLockLogicFilter, "userRaffleCount", 10L);
     }
@@ -58,7 +59,7 @@ public class RaffleStrategyTest {
     public void test_performRaffle() {
         RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
                 .userId("user001")
-                .strategyId(100001L)
+                .strategyId(100006L)
                 .build();
 
         RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
@@ -83,8 +84,8 @@ public class RaffleStrategyTest {
     @Test
     public void test_LogicChain_rule_blacklist() {
         ILogicChain logicChain = defaultChainFactory.openLogicChain(100001L);
-        Integer awardId = logicChain.Logic("user001", 100001L);
-        log.info("测试结果：{}", awardId);
+        DefaultChainFactory.StrategyAwardVO strategyAwardVO = logicChain.Logic("user001", 100001L);
+        log.info("测试结果：{}", JSON.toJSONString(strategyAwardVO));
     }
 
     @Test
@@ -92,15 +93,15 @@ public class RaffleStrategyTest {
         // 通过反射 mock 规则中的值
         ReflectionTestUtils.setField(ruleWeightLogicChain, "userScore", 4900L);
         ILogicChain logicChain = defaultChainFactory.openLogicChain(100001L);
-        Integer awardId = logicChain.Logic("xiaofuge", 100001L);
-        log.info("测试结果：{}", awardId);
+        DefaultChainFactory.StrategyAwardVO strategyAwardVO = logicChain.Logic("xiaofuge", 100001L);
+        log.info("测试结果：{}", JSON.toJSONString(strategyAwardVO));
     }
 
     @Test
     public void test_LogicChain_rule_default() {
         ILogicChain logicChain = defaultChainFactory.openLogicChain(100001L);
-        Integer awardId = logicChain.Logic("xiaofuge", 100001L);
-        log.info("测试结果：{}", awardId);
+        DefaultChainFactory.StrategyAwardVO strategyAwardVO = logicChain.Logic("xiaofuge", 100001L);
+        log.info("测试结果：{}", JSON.toJSONString(strategyAwardVO));
     }
     @Test
     public void test_raffle_center_rule_lock() {
