@@ -32,4 +32,7 @@ public class RaffleAwardEntity {
 
     //奖品内容描述
     private String awardDesc;
+
+    //排序
+    private Integer sort;
 }

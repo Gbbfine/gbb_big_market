@@ -9,6 +9,7 @@ import cn.bugstack.infrastructure.persistent.dto.*;
 import cn.bugstack.infrastructure.persistent.po.*;
 import cn.bugstack.infrastructure.redis.IRedisService;
 import cn.bugstack.types.common.Constants;
+import cn.bugstack.types.exception.AppException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -26,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static cn.bugstack.types.enums.ResponseCode.UN_ASSEMBLED_STRATEGY_ARMORY;
 
 /**
  * @Author: GBB
@@ -59,7 +62,7 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
         //获取抽奖策略
-        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_KEY + strategyId;
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_LIST_KEY + strategyId;
         //先从redis缓存中取策略实体
         List<StrategyAwardEntity> strategyAwardEntitys = redisService.getValue(cacheKey);
         //如果缓存存在，则直接返回
@@ -97,6 +100,10 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
 
     @Override
     public Integer getRateRange(String key) {
+        String cacheKey = Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key;
+        if (!redisService.isExists(cacheKey)) {
+            throw new AppException(UN_ASSEMBLED_STRATEGY_ARMORY.getCode(), cacheKey + Constants.COLON + UN_ASSEMBLED_STRATEGY_ARMORY.getInfo());
+        }
         return redisService.getValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key);
     }
 
@@ -313,5 +320,23 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
         strategyAward.setAwardCountSurplus(strategyAward.getAwardCountSurplus() - 1);
         // 执行更新操作
         strategyAwardDao.updateById(strategyAward);
+    }
+
+    @Override
+    public StrategyAwardEntity queryStrategyAwardEntity(Long strategyId, Integer awardId) {
+        //优先从缓存中获取
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_KEY + strategyId + Constants.UNDERLINE + awardId;
+        StrategyAwardEntity strategyAwardEntity = redisService.getValue(cacheKey);
+        if(null != strategyAwardEntity) return strategyAwardEntity;
+        //从数据库查
+        LambdaQueryWrapper<StrategyAward> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StrategyAward::getStrategyId, strategyId)
+                .eq(StrategyAward::getAwardId, awardId);
+        StrategyAward strategyAward = strategyAwardDao.selectOne(queryWrapper);
+        StrategyAwardEntity strategyAwardEntityObj = new StrategyAwardEntity();
+        BeanUtils.copyProperties(strategyAward, strategyAwardEntityObj);
+        //写回缓存
+        redisService.setValue(cacheKey, strategyAwardEntityObj);
+        return strategyAwardEntityObj;
     }
 }
