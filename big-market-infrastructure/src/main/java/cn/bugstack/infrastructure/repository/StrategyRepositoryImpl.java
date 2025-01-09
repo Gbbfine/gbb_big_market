@@ -11,8 +11,13 @@ import cn.bugstack.infrastructure.redis.IRedisService;
 import cn.bugstack.types.common.Constants;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBlockingQueue;
+import org.redisson.api.RDelayedQueue;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -20,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: GBB
@@ -28,6 +34,7 @@ import java.util.Map;
  * @Description: 策略仓储实现
  */
 
+@Slf4j
 @Repository
 public class StrategyRepositoryImpl implements IStrategyRepository {
 
@@ -244,5 +251,67 @@ public class StrategyRepositoryImpl implements IStrategyRepository {
         redisService.setValue(cacheKey, ruleTreeVODB);
 
         return ruleTreeVODB;
+    }
+
+    @Override
+    public void cacheStrategyAwardCount(String cacheKey, Integer awardCount) {
+        //这里通过能不能获取到cacheAwardCount来判断缓存中有没有cache不对，因为即使没有也会返回0
+//        Long cacheAwardCount = redisService.getAtomicLong(cacheKey);
+//        if(null != cacheAwardCount) return;
+        //直接判断是否有key存在，如果有直接返回，如果没有，则写入缓存
+        if(redisService.isExists(cacheKey)) return;
+        //这里存储的waardCount是Long型
+        redisService.setAtomicLong(cacheKey,Long.valueOf(awardCount));
+    }
+
+    @Override
+    public Boolean subtractionAwardStock(String cacheKey) {
+        //decr返回的是扣减之后的值
+        long surplus = redisService.decr(cacheKey);
+        if(surplus < 0){
+            //如果库存已经小于0了，那么先把库存设置成0，然后返回false
+            redisService.setValue(cacheKey, 0);
+            return false;
+        }
+        //如果还有库存,那么设置一个锁
+        String lockKey = cacheKey + Constants.UNDERLINE + surplus;
+        Boolean lock = redisService.setNx(lockKey);
+        if(!lock){
+            log.info("策略奖品库存加锁失败：{}",lockKey);
+        }
+        return lock;
+    }
+
+    @Override
+    public void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
+        //先写到阻塞队列
+        RBlockingQueue<StrategyAwardStockKeyVO> blockingQueue = redisService.getBlockingQueue(cacheKey);
+        //再写到延迟队列
+        RDelayedQueue<StrategyAwardStockKeyVO> delayedQueue = redisService.getDelayedQueue(blockingQueue);
+        delayedQueue.offer(strategyAwardStockKeyVO, 3, TimeUnit.SECONDS);
+
+    }
+
+    @Override
+    public StrategyAwardStockKeyVO takeQueueValue() {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
+        RBlockingQueue<StrategyAwardStockKeyVO> destinationQueue = redisService.getBlockingQueue(cacheKey);
+        return destinationQueue.poll();
+
+    }
+
+    @Transactional
+    @Override
+    public void updateStrategyAwardStock(Long strategyId, Integer awardId) {
+        // 创建 LambdaQueryWrapper，用于构建查询语句
+        LambdaQueryWrapper<StrategyAward> strategyAwardQueryWrapper = new LambdaQueryWrapper<>();
+        strategyAwardQueryWrapper.eq(StrategyAward::getStrategyId, strategyId)
+                .eq(StrategyAward::getAwardId, awardId);
+        StrategyAward strategyAward = strategyAwardDao.selectOne(strategyAwardQueryWrapper);
+
+        strategyAward.setAwardCountSurplus(strategyAward.getAwardCountSurplus() - 1);
+        // 执行更新操作
+        strategyAwardDao.updateById(strategyAward);
     }
 }
