@@ -1,6 +1,6 @@
 package cn.bugstack.test.infrastructure;
 
-import cn.bugstack.infrastructure.persistent.dto.IAwardDao;
+import cn.bugstack.infrastructure.persistent.dao.IAwardDao;
 import cn.bugstack.infrastructure.persistent.po.Award;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

@@ -1,4 +1,4 @@
-package cn.bugstack.infrastructure.persistent.dto;
+package cn.bugstack.infrastructure.persistent.dao;
 
 import cn.bugstack.infrastructure.persistent.po.RuleTree;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;

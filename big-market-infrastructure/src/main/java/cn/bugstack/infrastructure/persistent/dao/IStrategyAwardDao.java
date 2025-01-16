@@ -1,8 +1,7 @@
-package cn.bugstack.infrastructure.persistent.dto;
+package cn.bugstack.infrastructure.persistent.dao;
 
 import cn.bugstack.infrastructure.persistent.po.StrategyAward;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
