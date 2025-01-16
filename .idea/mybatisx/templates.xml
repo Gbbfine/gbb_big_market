@@ -68,16 +68,16 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="RaffleActivityAccount" />
-                  <option name="tableName" value="raffle_activity_account" />
+                  <option name="className" value="RaffleActivityCount" />
+                  <option name="tableName" value="raffle_activity_count" />
                 </TableUIInfo>
                 <TableUIInfo>
-                  <option name="className" value="RaffleActivityAccountFlow" />
-                  <option name="tableName" value="raffle_activity_account_flow" />
+                  <option name="className" value="RaffleActivity" />
+                  <option name="tableName" value="raffle_activity" />
                 </TableUIInfo>
                 <TableUIInfo>
-                  <option name="className" value="RaffleActivityOrder" />
-                  <option name="tableName" value="raffle_activity_order" />
+                  <option name="className" value="RaffleActivitySku" />
+                  <option name="tableName" value="raffle_activity_sku" />
                 </TableUIInfo>
               </list>
             </option>

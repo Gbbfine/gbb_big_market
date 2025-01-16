@@ -36,7 +36,7 @@ import static cn.bugstack.types.enums.ResponseCode.UN_ASSEMBLED_STRATEGY_ARMORY;
 
 @Slf4j
 @Repository
-public class StrategyRepositoryImpl implements IStrategyRepository {
+public class StrategyRepository implements IStrategyRepository {
 
     @Resource
     private IStrategyDao strategyDao;
