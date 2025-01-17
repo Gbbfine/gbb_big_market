@@ -19,7 +19,6 @@ import java.util.List;
 public interface IRaffleActivityOrderDao extends BaseMapper<RaffleActivityOrder> {
 
 
-    @DBRouter(key = "userId")
     void insertRaffleActivityOrder(RaffleActivityOrder raffleActivityOrder);
     @DBRouter
     List<RaffleActivityOrder> queryRaffleActivityOrderByUserId(String userId);
