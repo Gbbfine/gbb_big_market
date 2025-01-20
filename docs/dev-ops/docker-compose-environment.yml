@@ -9,7 +9,7 @@ services:
     restart: always
     environment:
       TZ: Asia/Shanghai
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: 001006
     ports:
       - "13306:3306"
     volumes:
@@ -33,7 +33,7 @@ services:
     environment:
       - PMA_HOST=mysql
       - PMA_PORT=3306
-      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_ROOT_PASSWORD=001006
     depends_on:
       mysql:
         condition: service_healthy
@@ -80,6 +80,24 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+
+  # rabbitmq
+  # 账密 admin/admin
+  # rabbitmq-plugins enable rabbitmq_management
+  rabbitmq:
+    image: rabbitmq:3.12.9
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin1006
+    command: rabbitmq-server
+    volumes:
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+
 
 networks:
   my-network:
