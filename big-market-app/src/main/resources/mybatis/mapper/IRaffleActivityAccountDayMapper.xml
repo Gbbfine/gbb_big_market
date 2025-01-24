@@ -20,4 +20,11 @@
         day,day_count,day_count_surplus,
         create_time,update_time
     </sql>
+
+    <select id="queryActivityAccountDayByUserId" parameterType="cn.bugstack.infrastructure.persistent.po.RaffleActivityAccountDay" resultMap="BaseResultMap">
+        select user_id, activity_id, day, day_count, day_count_surplus
+        from raffle_activity_account_day
+        where user_id = #{userId} and activity_id = #{activityId} and day = #{day}
+    </select>
+
 </mapper>

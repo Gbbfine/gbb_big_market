@@ -2,6 +2,7 @@ package cn.bugstack.infrastructure.persistent.dao;
 
 
 import cn.bugstack.infrastructure.persistent.po.RaffleActivityAccount;
+import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,6 +14,9 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface IRaffleActivityAccountDao extends BaseMapper<RaffleActivityAccount> {
+
+    @DBRouter
+    RaffleActivityAccount queryActivityAccountByUserId(RaffleActivityAccount raffleActivityAccountReq);
 
 }
 

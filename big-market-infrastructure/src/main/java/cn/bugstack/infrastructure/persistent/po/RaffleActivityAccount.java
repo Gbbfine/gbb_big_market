@@ -18,6 +18,9 @@ import java.util.Date;
  */
 @TableName(value ="raffle_activity_account")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RaffleActivityAccount extends Object implements Serializable {
     /**
      * 自增ID

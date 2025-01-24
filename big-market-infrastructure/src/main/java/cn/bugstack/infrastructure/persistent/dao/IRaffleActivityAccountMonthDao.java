@@ -1,7 +1,9 @@
 package cn.bugstack.infrastructure.persistent.dao;
 
 import cn.bugstack.infrastructure.persistent.po.RaffleActivityAccountMonth;
+import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author GBB
@@ -9,7 +11,12 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2025-01-22 19:09:40
 * @Entity generator.persistent.po.RaffleActivityAccountMonth
 */
+@Mapper
 public interface IRaffleActivityAccountMonthDao extends BaseMapper<RaffleActivityAccountMonth> {
+
+    @DBRouter
+    RaffleActivityAccountMonth queryActivityAccountMonthByUserId(RaffleActivityAccountMonth raffleActivityAccountMonthReq);
+
 
 }
 
