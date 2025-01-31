@@ -2,6 +2,7 @@ package cn.bugstack.infrastructure.persistent.dao;
 
 
 import cn.bugstack.infrastructure.persistent.po.UserAwardRecord;
+import cn.bugstack.middleware.db.router.annotation.DBRouterStrategy;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -12,8 +13,10 @@ import org.apache.ibatis.annotations.Mapper;
 * @Entity generator.persistent.po.UserAwardRecord000
 */
 @Mapper
+@DBRouterStrategy(splitTable = true)
 public interface IUserAwardRecordDao extends BaseMapper<UserAwardRecord> {
 
+    void insertUserAwardRecord(UserAwardRecord userAwardRecord);
 }
 
 

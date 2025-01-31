@@ -23,10 +23,22 @@ public class Task extends Object implements Serializable {
     private Integer id;
 
     /**
+     * 用户ID
+     */
+    @TableField(value = "user_id")
+    private String userId;
+
+    /**
      * 消息主题
      */
     @TableField(value = "topic")
     private String topic;
+
+    /**
+     * 消息编号
+     */
+    @TableField(value = "message_id")
+    private String messageId;
 
     /**
      * 消息主体

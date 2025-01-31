@@ -2,8 +2,11 @@ package cn.bugstack.infrastructure.persistent.dao;
 
 
 import cn.bugstack.infrastructure.persistent.po.Task;
+import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
 * @author GBB
@@ -13,6 +16,16 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface ITaskDao extends BaseMapper<Task> {
+
+    void insertTask(Task task);
+
+    @DBRouter
+    void updateTaskSendMessageCompleted(Task task);
+
+    @DBRouter
+    void updateTaskSendMessageFail(Task task);
+
+    List<Task> queryNoSendMessageTaskList();
 
 }
 

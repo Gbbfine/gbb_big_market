@@ -6,7 +6,9 @@
 
     <resultMap id="BaseResultMap" type="cn.bugstack.infrastructure.persistent.po.Task">
             <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="VARCHAR"/>
             <result property="topic" column="topic" jdbcType="VARCHAR"/>
+            <result property="messageId" column="message_id" jdbcType="VARCHAR"/>
             <result property="message" column="message" jdbcType="VARCHAR"/>
             <result property="state" column="state" jdbcType="VARCHAR"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -14,7 +16,37 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,topic,message,
-        state,create_time,update_time
+        id,user_id,topic,
+        message_id,message,state,
+        create_time,update_time
     </sql>
+
+    <insert id="insertTask" parameterType="cn.bugstack.infrastructure.persistent.po.Task">
+        insert into task(
+            user_id, topic, message_id, message, state, create_time, update_time
+        ) values (
+                     #{userId},#{topic},#{messageId},#{message},#{state},now(),now()
+                 )
+    </insert>
+
+    <update id="updateTaskSendMessageCompleted"
+            parameterType="cn.bugstack.infrastructure.persistent.po.Task">
+        update task
+        set state = 'completed', update_time = now()
+        where user_id = #{userId} and message_id = #{messageId}
+    </update>
+
+    <update id="updateTaskSendMessageFail" parameterType="cn.bugstack.infrastructure.persistent.po.Task">
+        update task
+        set state = 'fail', update_time = now()
+        where user_id = #{userId} and message_id = #{messageId}
+    </update>
+
+    <select id="queryNoSendMessageTaskList" resultMap="BaseResultMap">
+        select user_id, topic, message_id, message
+        from task
+        where state = 'fail' or (state = 'create' and TIMESTAMPDIFF(SECOND, update_time, now()) > 600)
+        limit 10
+    </select>
+
 </mapper>
