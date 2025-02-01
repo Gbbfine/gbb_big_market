@@ -19,6 +19,8 @@ public interface IRaffleActivityAccountDayDao extends BaseMapper<RaffleActivityA
     RaffleActivityAccountDay queryActivityAccountDayByUserId(RaffleActivityAccountDay raffleActivityAccountDayReq);
 
 
+    @DBRouter
+    Integer queryRaffleActivityAccountDayPartakeCount(RaffleActivityAccountDay raffleActivityAccountDay);
 }
 
 

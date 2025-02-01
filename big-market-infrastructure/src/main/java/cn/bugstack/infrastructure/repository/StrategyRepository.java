@@ -276,6 +276,11 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public Boolean subtractionAwardStock(String cacheKey) {
+        return subtractionAwardStock(cacheKey, null);
+    }
+
+    @Override
+    public Boolean subtractionAwardStock(String cacheKey, Date endDateTime) {
         //decr返回的是扣减之后的值
         long surplus = redisService.decr(cacheKey);
         if(surplus < 0){
@@ -285,11 +290,18 @@ public class StrategyRepository implements IStrategyRepository {
         }
         //如果还有库存,那么设置一个锁
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
-        Boolean lock = redisService.setNx(lockKey);
-        if(!lock){
-            log.info("策略奖品库存加锁失败：{}",lockKey);
+        Boolean lock = false;
+        if (null != endDateTime) {
+            long expireMillis = endDateTime.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+            lock = redisService.setNx(lockKey, expireMillis, TimeUnit.MILLISECONDS);
+        } else {
+            lock = redisService.setNx(lockKey);
+        }
+        if (!lock) {
+            log.info("策略奖品库存加锁失败 {}", lockKey);
         }
         return lock;
+
     }
 
     @Override
@@ -366,5 +378,18 @@ public class StrategyRepository implements IStrategyRepository {
         queryWrapper.eq(RaffleActivity::getActivityId, activityId);
         RaffleActivity raffleActivity = raffleActivityDao.selectOne(queryWrapper);
         return raffleActivity.getStrategyId();
+    }
+
+    @Override
+    public Map<String, Integer> queryAwardRuleLockCount(String[] treeIds) {
+        if(treeIds == null || treeIds.length == 0) return new HashMap<>();
+        List<RuleTreeNode> ruleTreeNodes = ruleTreeNodeDao.queryRuleLocks(treeIds);
+        Map<String, Integer> resultMap = new HashMap<>();
+        for (RuleTreeNode ruleTreeNode : ruleTreeNodes) {
+            String treeId = ruleTreeNode.getTreeId();
+            Integer ruleValue = Integer.valueOf(ruleTreeNode.getRuleValue());
+            resultMap.put(treeId, ruleValue);
+        }
+        return resultMap;
     }
 }

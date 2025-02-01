@@ -1,5 +1,7 @@
 package cn.bugstack.domain.strategy.service.armory;
 
+import java.util.Date;
+
 /**
  * @Author: GBB
  * @Date: 2024/12/26
@@ -29,7 +31,7 @@ public interface IStrategyDispatch {
      * @param awardId
      * @return
      */
-    Boolean subtractionAwardStock(Long strategyId, Integer awardId);
+    Boolean subtractionAwardStock(Long strategyId, Integer awardId, Date endDateTime);
 
 
 }

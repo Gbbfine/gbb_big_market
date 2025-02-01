@@ -4,6 +4,8 @@ import cn.bugstack.infrastructure.persistent.po.RuleTreeNode;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 
 /**
 * @author GBB
@@ -14,6 +16,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface IRuleTreeNodeDao extends BaseMapper<RuleTreeNode> {
 
+    List<RuleTreeNode> queryRuleLocks(String[] treeIds);
 }
 
 
