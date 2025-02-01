@@ -109,4 +109,5 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
                 .build();
         return userRaffleOrderEntity;
     }
+
 }

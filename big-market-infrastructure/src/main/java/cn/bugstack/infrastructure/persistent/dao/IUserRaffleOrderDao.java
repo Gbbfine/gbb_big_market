@@ -21,6 +21,8 @@ public interface IUserRaffleOrderDao extends BaseMapper<UserRaffleOrder> {
 
     @DBRouter
     UserRaffleOrder queryNoUsedRaffleOrder(UserRaffleOrder userRaffleOrderReq);
+
+    int updateUserRaffleOrderStateUsed(UserRaffleOrder userRaffleOrder);
 }
 
 

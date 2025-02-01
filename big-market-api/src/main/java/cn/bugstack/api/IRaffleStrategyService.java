@@ -2,8 +2,8 @@ package cn.bugstack.api;
 
 import cn.bugstack.api.dto.RaffleAwardListRequestDTO;
 import cn.bugstack.api.dto.RaffleAwardListResponseDTO;
-import cn.bugstack.api.dto.RaffleRequestDTO;
-import cn.bugstack.api.dto.RaffleResponseDTO;
+import cn.bugstack.api.dto.RaffleStrategyRequestDTO;
+import cn.bugstack.api.dto.RaffleStrategyResponseDTO;
 import cn.bugstack.types.model.Response;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
  * @Time: 15:57
  * @Description: 抽奖服务接口
  */
-public interface IRaffleService {
+public interface IRaffleStrategyService {
 
     /**
      * 策略装备接口
@@ -35,6 +35,6 @@ public interface IRaffleService {
      * @param requestDTO 请求参数
      * @return 抽奖结果
      */
-    Response<RaffleResponseDTO> RandomRaffle(RaffleRequestDTO requestDTO);
+    Response<RaffleStrategyResponseDTO> RandomRaffle(RaffleStrategyRequestDTO requestDTO);
 
 }

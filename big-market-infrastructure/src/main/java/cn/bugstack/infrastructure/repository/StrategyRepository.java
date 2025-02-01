@@ -11,6 +11,7 @@ import cn.bugstack.infrastructure.redis.IRedisService;
 import cn.bugstack.types.common.Constants;
 import cn.bugstack.types.exception.AppException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RDelayedQueue;
@@ -19,10 +20,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static cn.bugstack.types.enums.ResponseCode.UN_ASSEMBLED_STRATEGY_ARMORY;
@@ -54,7 +53,14 @@ public class StrategyRepository implements IStrategyRepository {
     @Resource
     private IRuleTreeNodeDao ruleTreeNodeDao;
 
-    @Resource IRuleTreeNodeLineDao ruleTreeNodeLineDao;
+    @Resource
+    private IRuleTreeNodeLineDao ruleTreeNodeLineDao;
+
+    @Resource
+    private IRaffleActivityDao raffleActivityDao;
+
+    @Resource
+    private IRaffleActivityAccountDayDao raffleActivityAccountDayDao;
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
@@ -335,5 +341,30 @@ public class StrategyRepository implements IStrategyRepository {
         //写回缓存
         redisService.setValue(cacheKey, strategyAwardEntityObj);
         return strategyAwardEntityObj;
+    }
+
+    @Override
+    public Integer queryTodayUserRaffleCount(String userId, Long strategyId) {
+        LambdaQueryWrapper<RaffleActivity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(RaffleActivity::getStrategyId, strategyId);
+        RaffleActivity raffleActivity = raffleActivityDao.selectOne(queryWrapper);
+        RaffleActivityAccountDay raffleActivityAccountDay = new RaffleActivityAccountDay();
+        SimpleDateFormat dateFormatDay = new SimpleDateFormat("yyyy-MM-dd");
+        raffleActivityAccountDay.setUserId(userId);
+        raffleActivityAccountDay.setActivityId(raffleActivity.getActivityId());
+        raffleActivityAccountDay.setDay(dateFormatDay.format(new Date()));
+        RaffleActivityAccountDay raffleActivityAccountDayObj = raffleActivityAccountDayDao.queryActivityAccountDayByUserId(raffleActivityAccountDay);
+        if(raffleActivityAccountDayObj == null) return 0;
+        //今日参与数 = 总次数 - 今日剩余数
+        return raffleActivityAccountDayObj.getDayCount() - raffleActivityAccountDayObj.getDayCountSurplus();
+
+    }
+
+    @Override
+    public Long queryStrategyIdByActivityId(Long activityId) {
+        LambdaQueryWrapper<RaffleActivity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(RaffleActivity::getActivityId, activityId);
+        RaffleActivity raffleActivity = raffleActivityDao.selectOne(queryWrapper);
+        return raffleActivity.getStrategyId();
     }
 }

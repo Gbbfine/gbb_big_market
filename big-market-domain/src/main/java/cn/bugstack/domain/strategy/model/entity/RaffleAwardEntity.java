@@ -27,6 +27,9 @@ public class RaffleAwardEntity {
     //奖品对接标识 每一个都是一个对应的发奖策略
     private String awardKey;
 
+    // 奖品标题
+    private String AwardTitle;
+
     //奖品配置信息
     private String awardConfig;
 

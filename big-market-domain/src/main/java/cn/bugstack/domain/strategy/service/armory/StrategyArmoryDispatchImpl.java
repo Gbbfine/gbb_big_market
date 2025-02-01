@@ -82,6 +82,13 @@ public class StrategyArmoryDispatchImpl implements IStrategyArmory, IStrategyDis
         return true;
     }
 
+    @Override
+    public boolean assembleLotteryStrategyByActivityId(Long activityId) {
+        Long strategyId = repository.queryStrategyIdByActivityId(activityId);
+        return assembleLotteryStrategy(strategyId);
+
+    }
+
     /**
      * 缓存奖品到redis
      * @param strategyId

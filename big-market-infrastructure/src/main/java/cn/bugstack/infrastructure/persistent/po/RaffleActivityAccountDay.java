@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -16,6 +17,8 @@ import java.util.Date;
 @TableName(value ="raffle_activity_account_day")
 @Data
 public class RaffleActivityAccountDay extends Object implements Serializable {
+
+
     /**
      * 自增ID
      */
@@ -66,4 +69,6 @@ public class RaffleActivityAccountDay extends Object implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+
 }
