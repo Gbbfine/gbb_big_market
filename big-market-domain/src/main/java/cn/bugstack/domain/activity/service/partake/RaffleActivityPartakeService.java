@@ -57,7 +57,7 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
                     .activityId(activityId)
                     .month(month)
                     .monthCount(activityAccountEntity.getMonthCount())
-                    .monthCountSurplus(activityAccountEntity.getMonthCountSurplus())
+                    .monthCountSurplus(activityAccountEntity.getMonthCount())
                     .build();
         }
 
@@ -75,7 +75,7 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
                     .activityId(activityId)
                     .day(day)
                     .dayCount(activityAccountEntity.getDayCount())
-                    .dayCountSurplus(activityAccountEntity.getDayCountSurplus())
+                    .dayCountSurplus(activityAccountEntity.getDayCount())
                     .build();
         }
 
