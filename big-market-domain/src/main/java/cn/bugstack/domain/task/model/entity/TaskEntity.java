@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class taskEntity {
+public class TaskEntity {
 
     // 活动id
     private String userId;

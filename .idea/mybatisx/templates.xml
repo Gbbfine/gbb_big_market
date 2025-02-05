@@ -68,8 +68,12 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="Task" />
-                  <option name="tableName" value="task" />
+                  <option name="className" value="DailyBehaviorRebate" />
+                  <option name="tableName" value="daily_behavior_rebate" />
+                </TableUIInfo>
+                <TableUIInfo>
+                  <option name="className" value="UserBehaviorRebateOrder000" />
+                  <option name="tableName" value="user_behavior_rebate_order_000" />
                 </TableUIInfo>
               </list>
             </option>
