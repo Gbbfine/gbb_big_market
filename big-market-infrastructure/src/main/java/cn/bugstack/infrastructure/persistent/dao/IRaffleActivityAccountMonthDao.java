@@ -19,6 +19,7 @@ public interface IRaffleActivityAccountMonthDao extends BaseMapper<RaffleActivit
     RaffleActivityAccountMonth queryActivityAccountMonthByUserId(RaffleActivityAccountMonth raffleActivityAccountMonthReq);
 
 
+    void addAccountQuota(RaffleActivityAccountMonth raffleActivityAccountMonth);
 }
 
 

@@ -73,6 +73,7 @@ public class BehaviorRebateService implements IBehaviorRebateService{
             TaskEntity taskEntity = TaskEntity.builder()
                     .userId(behaviorEntity.getUserId())
                     .topic(sendRebateMessageEvent.topic())
+                    .messageId(rebateMessageEventMessage.getId())
                     .message(rebateMessageEventMessage)
                     .state(TaskStateVO.create)
                     .build();
