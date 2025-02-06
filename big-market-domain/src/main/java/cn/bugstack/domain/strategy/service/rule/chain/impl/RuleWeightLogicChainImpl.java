@@ -1,5 +1,6 @@
 package cn.bugstack.domain.strategy.service.rule.chain.impl;
 
+import cn.bugstack.domain.activity.model.entity.ActivityAccountEntity;
 import cn.bugstack.domain.strategy.repository.IStrategyRepository;
 import cn.bugstack.domain.strategy.service.armory.IStrategyDispatch;
 import cn.bugstack.domain.strategy.service.rule.chain.AbstractLogicChain;
@@ -28,7 +29,7 @@ public class RuleWeightLogicChainImpl extends AbstractLogicChain {
     private IStrategyDispatch strategyDispatch;
 
     // 根据用户ID查询用户抽奖消耗的积分值，本章节我们先写死为固定的值。后续需要从数据库中查询。
-    public Long userScore = 0L;
+//    public Long userScore = 0L;
 
     /**
      * 权重责任链过滤；
@@ -50,6 +51,9 @@ public class RuleWeightLogicChainImpl extends AbstractLogicChain {
 
         // 3. 找出最小符合的值，也就是【4500 积分，能找到 4000:102,103,104,105】、【5000 积分，能找到 5000:102,103,104,105,106,107】
         // 找到最后一个符合的值[如用户传了一个 5900 应该返回正确结果为 5000]，如果使用 Lambda findFirst 需要注意使用 sorted 反转结果
+
+        Integer userScore = repository.queryActivityAccountTotalUseCount(userId, strategyId);
+
         Long nextValue = analyticalSortedKeys.stream()
                 .filter(key -> userScore >= key)
                 .max(Comparator.naturalOrder())

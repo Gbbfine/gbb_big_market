@@ -2,9 +2,12 @@ package cn.bugstack.infrastructure.persistent.dao;
 
 
 import cn.bugstack.infrastructure.persistent.po.UserBehaviorRebateOrder;
+import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import cn.bugstack.middleware.db.router.annotation.DBRouterStrategy;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
 * @author GBB
@@ -17,6 +20,9 @@ import org.apache.ibatis.annotations.Mapper;
 public interface IUserBehaviorRebateOrderDao extends BaseMapper<UserBehaviorRebateOrder> {
 
     void insertUserBehaviorRebateOrder(UserBehaviorRebateOrder userBehaviorRebateOrder);
+
+    @DBRouter
+    List<UserBehaviorRebateOrder> queryOrderByOutBusinessNo(UserBehaviorRebateOrder userBehaviorRebateOrderReq);
 }
 
 

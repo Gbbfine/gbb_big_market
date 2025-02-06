@@ -3,6 +3,8 @@ package cn.bugstack.test.trigger;
 import cn.bugstack.api.IRaffleActivityService;
 import cn.bugstack.api.dto.ActivityDrawRequestDTO;
 import cn.bugstack.api.dto.ActivityDrawResponseDTO;
+import cn.bugstack.api.dto.UserActivityAccountRequestDTO;
+import cn.bugstack.api.dto.UserActivityAccountResponseDTO;
 import cn.bugstack.types.model.Response;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,33 @@ public class RaffleActivityControllerTest {
         log.info("请求参数：{}", JSON.toJSONString(request));
         log.info("测试结果：{}", JSON.toJSONString(response));
     }
+
+    @Test
+    public void test_calendarSignRebate(){
+        Response<Boolean> response = raffleActivityService.calendarSignRebate("xiaofuge10");
+        log.info("测试结果：{}", JSON.toJSONString(response));
+    }
+
+    @Test
+    public void test_isCalendarSignRebate() {
+        Response<Boolean> response = raffleActivityService.isCalendarSignRebate("xiaofuge10");
+        log.info("测试结果：{}", JSON.toJSONString(response));
+    }
+
+    @Test
+    public void test_queryUserActivityAccount() {
+        UserActivityAccountRequestDTO request = new UserActivityAccountRequestDTO();
+        request.setActivityId(100301L);
+        request.setUserId("xiaofuge10");
+
+        // 查询数据
+        Response<UserActivityAccountResponseDTO> response = raffleActivityService.queryUserActivityAccount(request);
+
+        log.info("请求参数：{}", JSON.toJSONString(request));
+        log.info("测试结果：{}", JSON.toJSONString(response));
+    }
+
+
 
 }
 

@@ -12,4 +12,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface IStrategyRuleDao extends BaseMapper<StrategyRule> {
+
+    String queryStrategyRuleValue(StrategyRule strategyRuleReq);
 }

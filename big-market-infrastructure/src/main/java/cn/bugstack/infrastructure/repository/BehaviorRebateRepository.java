@@ -118,4 +118,22 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
 
 
     }
+
+    @Override
+    public List<BehaviorRebateOrderEntity> queryOrderByOutBusinessNo(String userId, String outBusinessNo) {
+        // 1.请求对象
+        UserBehaviorRebateOrder userBehaviorRebateOrderReq = new UserBehaviorRebateOrder();
+        userBehaviorRebateOrderReq.setUserId(userId);
+        userBehaviorRebateOrderReq.setOutBusinessNo(outBusinessNo);
+        // 2.查询结果
+        List<UserBehaviorRebateOrder> userBehaviorRebateOrders = userBehaviorRebateOrderDao.queryOrderByOutBusinessNo(userBehaviorRebateOrderReq);
+        List<BehaviorRebateOrderEntity> behaviorRebateOrderEntityList = new ArrayList<>(userBehaviorRebateOrders.size());
+        for (UserBehaviorRebateOrder userBehaviorRebateOrder : userBehaviorRebateOrders) {
+            BehaviorRebateOrderEntity behaviorRebateOrderEntity = new BehaviorRebateOrderEntity();
+            BeanUtils.copyProperties(userBehaviorRebateOrder, behaviorRebateOrderEntity);
+            behaviorRebateOrderEntityList.add(behaviorRebateOrderEntity);
+        }
+
+        return behaviorRebateOrderEntityList;
+    }
 }
