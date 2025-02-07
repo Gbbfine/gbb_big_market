@@ -16,6 +16,8 @@ public interface IUserCreditAccountDao extends BaseMapper<UserCreditAccount> {
     int updateAddAmount(UserCreditAccount userCreditAccountReq);
 
     void insertUserCreditAccount(UserCreditAccount userCreditAccountReq);
+
+    UserCreditAccount queryUserCreditAccount(UserCreditAccount userCreditAccountReq);
 }
 
 
