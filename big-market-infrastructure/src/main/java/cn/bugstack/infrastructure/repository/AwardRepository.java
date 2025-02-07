@@ -1,22 +1,21 @@
 package cn.bugstack.infrastructure.repository;
 
 
+import cn.bugstack.domain.award.model.aggregate.GiveOutPrizesAggregate;
 import cn.bugstack.domain.award.model.aggregate.UserAwardRecordAggregate;
 import cn.bugstack.domain.award.model.entity.TaskEntity;
 import cn.bugstack.domain.award.model.entity.UserAwardRecordEntity;
+import cn.bugstack.domain.award.model.entity.UserCreditAwardEntity;
+import cn.bugstack.domain.award.model.vo.AccountStatusVO;
 import cn.bugstack.domain.award.repository.IAwardRepository;
 import cn.bugstack.infrastructure.event.EventPublisher;
-import cn.bugstack.infrastructure.persistent.dao.ITaskDao;
-import cn.bugstack.infrastructure.persistent.dao.IUserAwardRecordDao;
-import cn.bugstack.infrastructure.persistent.dao.IUserRaffleOrderDao;
-import cn.bugstack.infrastructure.persistent.po.RaffleActivityOrder;
-import cn.bugstack.infrastructure.persistent.po.Task;
-import cn.bugstack.infrastructure.persistent.po.UserAwardRecord;
-import cn.bugstack.infrastructure.persistent.po.UserRaffleOrder;
+import cn.bugstack.infrastructure.persistent.dao.*;
+import cn.bugstack.infrastructure.persistent.po.*;
 import cn.bugstack.middleware.db.router.strategy.IDBRouterStrategy;
 import cn.bugstack.types.enums.ResponseCode;
 import cn.bugstack.types.exception.AppException;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
@@ -36,6 +35,8 @@ import javax.annotation.Resource;
 public class AwardRepository implements IAwardRepository {
 
     @Resource
+    private IAwardDao awardDao;
+    @Resource
     private ITaskDao taskDao;
     @Resource
     private IUserAwardRecordDao userAwardRecordDao;
@@ -47,6 +48,8 @@ public class AwardRepository implements IAwardRepository {
     private EventPublisher eventPublisher;
     @Resource
     private IUserRaffleOrderDao userRaffleOrderDao;
+    @Resource
+    private IUserCreditAccountDao userCreditAccountDao;
 
 
     @Override
@@ -112,4 +115,69 @@ public class AwardRepository implements IAwardRepository {
         }
 
     }
+
+    @Override
+    public String queryAwardConfig(Integer awardId) {
+        LambdaQueryWrapper<Award> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Award::getAwardId, awardId);
+        Award award = awardDao.selectOne(queryWrapper);
+        return award.getAwardConfig();
+    }
+
+    @Override
+    public void saveGiveOutPrizesAggregate(GiveOutPrizesAggregate giveOutPrizesAggregate) {
+        String userId = giveOutPrizesAggregate.getUserId();
+        UserCreditAwardEntity userCreditAwardEntity = giveOutPrizesAggregate.getUserCreditAwardEntity();
+        UserAwardRecordEntity userAwardRecordEntity = giveOutPrizesAggregate.getUserAwardRecordEntity();
+
+        // 更新发奖记录
+        UserAwardRecord userAwardRecordReq = new UserAwardRecord();
+        userAwardRecordReq.setUserId(userId);
+        userAwardRecordReq.setOrderId(userAwardRecordEntity.getOrderId());
+        userAwardRecordReq.setAwardState(userAwardRecordEntity.getAwardState().getCode());
+
+        // 更新用户积分 「首次则插入数据」
+        UserCreditAccount userCreditAccountReq = new UserCreditAccount();
+        userCreditAccountReq.setUserId(userCreditAwardEntity.getUserId());
+        userCreditAccountReq.setTotalAmount(userCreditAwardEntity.getCreditAmount());
+        userCreditAccountReq.setAvailableAmount(userCreditAwardEntity.getCreditAmount());
+        userCreditAccountReq.setAccountStatus(AccountStatusVO.open.getCode());
+
+        try {
+            dbRouter.doRouter(giveOutPrizesAggregate.getUserId());
+            transactionTemplate.execute(status -> {
+                try {
+                    // 更新积分 || 创建积分账户
+                    int updateAccountCount = userCreditAccountDao.updateAddAmount(userCreditAccountReq);
+                    if (0 == updateAccountCount) {
+                        userCreditAccountDao.insertUserCreditAccount(userCreditAccountReq);
+                    }
+
+                    // 更新奖品记录
+                    int updateAwardCount = userAwardRecordDao.updateAwardRecordCompletedState(userAwardRecordReq);
+                    if (0 == updateAwardCount) {
+                        log.warn("更新中奖记录，重复更新拦截 userId:{} giveOutPrizesAggregate:{}", userId, JSON.toJSONString(giveOutPrizesAggregate));
+                        status.setRollbackOnly();
+                    }
+                    return 1;
+                } catch (DuplicateKeyException e) {
+                    status.setRollbackOnly();
+                    log.error("更新中奖记录，唯一索引冲突 userId: {} ", userId, e);
+                    throw new AppException(ResponseCode.INDEX_DUP.getCode(), e);
+                }
+            });
+        } finally {
+            dbRouter.clear();
+        }
+    }
+
+    @Override
+    public String queryAwardKey(Integer awardId) {
+        LambdaQueryWrapper<Award> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Award::getAwardId, awardId);
+        Award award = awardDao.selectOne(queryWrapper);
+        return award.getAwardKey();
+    }
+
 }
+

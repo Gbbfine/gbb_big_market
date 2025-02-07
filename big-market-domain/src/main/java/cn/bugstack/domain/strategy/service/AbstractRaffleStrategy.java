@@ -61,7 +61,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
 //            return RaffleAwardEntity.builder()
 //                    .awardId(chainStrategyAwardVO.getAwardId())
 //                    .build();
-            return buildRaffleAwardEntity(strategyId, chainStrategyAwardVO.getAwardId(), null);
+            return buildRaffleAwardEntity(strategyId, chainStrategyAwardVO.getAwardId(), chainStrategyAwardVO.getAwardRuleValue());
         }
 
         // 3. 规则树抽奖过滤【奖品ID，会根据抽奖次数判断、库存判断、兜底兜里返回最终的可获得奖品信息】

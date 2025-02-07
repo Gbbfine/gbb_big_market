@@ -17,6 +17,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface IUserAwardRecordDao extends BaseMapper<UserAwardRecord> {
 
     void insertUserAwardRecord(UserAwardRecord userAwardRecord);
+
+    int updateAwardRecordCompletedState(UserAwardRecord userAwardRecordReq);
 }
 
 

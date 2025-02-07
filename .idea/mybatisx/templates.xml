@@ -68,8 +68,8 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="UserBehaviorRebateOrder001" />
-                  <option name="tableName" value="user_behavior_rebate_order_001" />
+                  <option name="className" value="UserCreditAccount" />
+                  <option name="tableName" value="user_credit_account" />
                 </TableUIInfo>
               </list>
             </option>
