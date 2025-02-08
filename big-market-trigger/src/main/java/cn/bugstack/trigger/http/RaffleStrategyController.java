@@ -125,7 +125,7 @@ public class RaffleStrategyController implements IRaffleStrategyService {
                 Integer awardRuleLockCount = ruleLockCountMap.get(strategyAwardEntity.getRuleModels());
                 responseDTO.setAwardRuleLockCount(awardRuleLockCount);
                 responseDTO.setIsAwardUnlock(null == awardRuleLockCount || dayPartakeCount >= awardRuleLockCount);
-                responseDTO.setWaitUnlockCount(null == awardRuleLockCount || awardRuleLockCount <= dayPartakeCount ? 0 : awardRuleLockCount - dayPartakeCount);
+                responseDTO.setWaitUnLockCount(null == awardRuleLockCount || awardRuleLockCount <= dayPartakeCount ? 0 : awardRuleLockCount - dayPartakeCount);
                 raffleAwardListResponseDTOs.add(responseDTO);
             }
             Response<List<RaffleAwardListResponseDTO>> response = Response.<List<RaffleAwardListResponseDTO>>builder()
