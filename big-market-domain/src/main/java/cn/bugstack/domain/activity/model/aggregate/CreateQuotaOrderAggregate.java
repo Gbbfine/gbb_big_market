@@ -1,7 +1,7 @@
 package cn.bugstack.domain.activity.model.aggregate;
 
-import cn.bugstack.domain.activity.model.entity.ActivityAccountEntity;
 import cn.bugstack.domain.activity.model.entity.ActivityOrderEntity;
+import cn.bugstack.domain.activity.model.vo.OrderStateVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderAggregate {
+public class CreateQuotaOrderAggregate {
 
     /**
      * 用户ID
@@ -48,6 +48,10 @@ public class CreateOrderAggregate {
      * 活动订单实体
      */
     private ActivityOrderEntity activityOrderEntity;
+
+    public void setOrderState(OrderStateVO orderState) {
+        this.activityOrderEntity.setState(orderState);
+    }
 
 }
 

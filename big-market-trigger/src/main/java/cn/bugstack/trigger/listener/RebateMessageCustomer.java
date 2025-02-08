@@ -1,6 +1,7 @@
 package cn.bugstack.trigger.listener;
 
 import cn.bugstack.domain.activity.model.entity.SkuRechargeEntity;
+import cn.bugstack.domain.activity.model.vo.OrderTradeTypeVO;
 import cn.bugstack.domain.activity.service.IRaffleActivityAccountQuotaService;
 import cn.bugstack.domain.credit.model.entity.TradeEntity;
 import cn.bugstack.domain.credit.model.vo.TradeNameVO;
@@ -60,6 +61,7 @@ public class RebateMessageCustomer {
                     skuRechargeEntity.setUserId(rebateMessage.getUserId());
                     skuRechargeEntity.setSku(Long.valueOf(rebateMessage.getRebateConfig()));
                     skuRechargeEntity.setOutBusinessNo(rebateMessage.getBizId());
+                    skuRechargeEntity.setOrderTradeType(OrderTradeTypeVO.rebate_no_pay_trade);
                     raffleActivityAccountQuotaService.createOrder(skuRechargeEntity);
                     break;
                 case "integral":

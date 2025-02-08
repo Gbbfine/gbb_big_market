@@ -1,9 +1,6 @@
 package cn.bugstack.domain.activity.service;
 
-import cn.bugstack.domain.activity.model.entity.ActivityAccountEntity;
-import cn.bugstack.domain.activity.model.entity.ActivityOrderEntity;
-import cn.bugstack.domain.activity.model.entity.ActivityShopCartEntity;
-import cn.bugstack.domain.activity.model.entity.SkuRechargeEntity;
+import cn.bugstack.domain.activity.model.entity.*;
 
 /**
  * @Author: GBB
@@ -32,6 +29,14 @@ public interface IRaffleActivityAccountQuotaService {
      * @return 活动ID
      */
     String createOrder(SkuRechargeEntity skuRechargeEntity);
+
+    /**
+     * 订单出货 - 积分充值
+     * @param deliveryOrderEntity 出货单实体对象
+     */
+    void updateOrder(DeliveryOrderEntity deliveryOrderEntity);
+
+
 
     Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
 

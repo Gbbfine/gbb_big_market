@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -81,6 +82,12 @@ public class RaffleActivityOrder extends Object implements Serializable {
      */
     @TableField(value = "month_count")
     private Integer monthCount;
+
+    /**
+     * 支付金额【积分】
+     */
+    @TableField(value = "pay_amount")
+    private BigDecimal payAmount;
 
     /**
      * 订单状态（complete）

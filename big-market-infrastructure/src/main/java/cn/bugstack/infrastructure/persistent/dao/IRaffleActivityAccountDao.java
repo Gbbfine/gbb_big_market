@@ -18,6 +18,9 @@ public interface IRaffleActivityAccountDao extends BaseMapper<RaffleActivityAcco
     @DBRouter
     RaffleActivityAccount queryActivityAccountByUserId(RaffleActivityAccount raffleActivityAccountReq);
 
+    RaffleActivityAccount queryAccountByUserId(RaffleActivityAccount raffleActivityAccount);
+
+    void updateAccountQuota(RaffleActivityAccount raffleActivityAccount);
 }
 
 
