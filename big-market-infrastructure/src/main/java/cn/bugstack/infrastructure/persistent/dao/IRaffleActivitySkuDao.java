@@ -5,6 +5,8 @@ import cn.bugstack.infrastructure.persistent.po.RaffleActivitySku;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
 * @author GBB
 * @description 针对表【raffle_activity_sku】的数据库操作Mapper
@@ -14,6 +16,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface IRaffleActivitySkuDao extends BaseMapper<RaffleActivitySku> {
 
+    List<RaffleActivitySku> queryActivitySkuListByActivityId(Long activityId);
 }
 
 

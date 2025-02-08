@@ -27,6 +27,9 @@ public interface IRaffleActivityOrderDao extends BaseMapper<RaffleActivityOrder>
     RaffleActivityOrder queryRaffleActivityOrder(RaffleActivityOrder raffleActivityOrderReq);
 
     int updateOrderCompleted(RaffleActivityOrder raffleActivityOrderReq);
+
+    @DBRouter
+    RaffleActivityOrder queryUnpaidActivityOrder(RaffleActivityOrder raffleActivityOrderReq);
 }
 
 

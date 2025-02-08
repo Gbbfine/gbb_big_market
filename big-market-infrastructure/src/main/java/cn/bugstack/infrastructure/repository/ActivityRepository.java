@@ -203,6 +203,49 @@ public class ActivityRepository implements IActivityRepository {
     }
 
     @Override
+    public void doSaveCreditPayOrder(CreateQuotaOrderAggregate createQuotaOrderAggregate) {
+        try {
+            // 创建交易订单
+            ActivityOrderEntity activityOrderEntity = createQuotaOrderAggregate.getActivityOrderEntity();
+            RaffleActivityOrder raffleActivityOrder = new RaffleActivityOrder();
+            raffleActivityOrder.setUserId(activityOrderEntity.getUserId());
+            raffleActivityOrder.setSku(activityOrderEntity.getSku());
+            raffleActivityOrder.setActivityId(activityOrderEntity.getActivityId());
+            raffleActivityOrder.setActivityName(activityOrderEntity.getActivityName());
+            raffleActivityOrder.setStrategyId(activityOrderEntity.getStrategyId());
+            raffleActivityOrder.setOrderId(activityOrderEntity.getOrderId());
+            raffleActivityOrder.setOrderTime(activityOrderEntity.getOrderTime());
+            raffleActivityOrder.setTotalCount(activityOrderEntity.getTotalCount());
+            raffleActivityOrder.setDayCount(activityOrderEntity.getDayCount());
+            raffleActivityOrder.setMonthCount(activityOrderEntity.getMonthCount());
+            raffleActivityOrder.setTotalCount(createQuotaOrderAggregate.getTotalCount());
+            raffleActivityOrder.setDayCount(createQuotaOrderAggregate.getDayCount());
+            raffleActivityOrder.setMonthCount(createQuotaOrderAggregate.getMonthCount());
+            raffleActivityOrder.setPayAmount(activityOrderEntity.getPayAmount());
+            raffleActivityOrder.setState(activityOrderEntity.getState().getCode());
+            raffleActivityOrder.setOutBusinessNo(activityOrderEntity.getOutBusinessNo());
+
+            // 以用户ID作为切分键，通过 doRouter 设定路由【这样就保证了下面的操作，都是同一个链接下，也就保证了事务的特性】
+            dbRouter.doRouter(createQuotaOrderAggregate.getUserId());
+
+            // 编程式事务
+            transactionTemplate.execute(status -> {
+                try {
+                    raffleActivityOrderDao.insert(raffleActivityOrder);
+                    return 1;
+                } catch (DuplicateKeyException e) {
+                    status.setRollbackOnly();
+                    log.error("写入订单记录，唯一索引冲突 userId: {} activityId: {} sku: {}", activityOrderEntity.getUserId(), activityOrderEntity.getActivityId(), activityOrderEntity.getSku(), e);
+                    throw new AppException(ResponseCode.INDEX_DUP.getCode(), e);
+                }
+            });
+        } finally {
+            dbRouter.clear();
+        }
+
+    }
+
+    @Override
     public void cacheActivitySkuStockCount(String cacheKey, Integer stockCount) {
         if(!redisService.isExists(cacheKey))
             redisService.setAtomicLong(cacheKey, Long.valueOf(stockCount));
@@ -649,48 +692,48 @@ public class ActivityRepository implements IActivityRepository {
         }
     }
 
-
     @Override
-    public void doSaveCreditPayOrder(CreateQuotaOrderAggregate createQuotaOrderAggregate) {
-        try {
-            // 创建交易订单
-            ActivityOrderEntity activityOrderEntity = createQuotaOrderAggregate.getActivityOrderEntity();
-            RaffleActivityOrder raffleActivityOrder = new RaffleActivityOrder();
-            raffleActivityOrder.setUserId(activityOrderEntity.getUserId());
-            raffleActivityOrder.setSku(activityOrderEntity.getSku());
-            raffleActivityOrder.setActivityId(activityOrderEntity.getActivityId());
-            raffleActivityOrder.setActivityName(activityOrderEntity.getActivityName());
-            raffleActivityOrder.setStrategyId(activityOrderEntity.getStrategyId());
-            raffleActivityOrder.setOrderId(activityOrderEntity.getOrderId());
-            raffleActivityOrder.setOrderTime(activityOrderEntity.getOrderTime());
-            raffleActivityOrder.setTotalCount(activityOrderEntity.getTotalCount());
-            raffleActivityOrder.setDayCount(activityOrderEntity.getDayCount());
-            raffleActivityOrder.setMonthCount(activityOrderEntity.getMonthCount());
-            raffleActivityOrder.setTotalCount(createQuotaOrderAggregate.getTotalCount());
-            raffleActivityOrder.setDayCount(createQuotaOrderAggregate.getDayCount());
-            raffleActivityOrder.setMonthCount(createQuotaOrderAggregate.getMonthCount());
-            raffleActivityOrder.setPayAmount(activityOrderEntity.getPayAmount());
-            raffleActivityOrder.setState(activityOrderEntity.getState().getCode());
-            raffleActivityOrder.setOutBusinessNo(activityOrderEntity.getOutBusinessNo());
-
-            // 以用户ID作为切分键，通过 doRouter 设定路由【这样就保证了下面的操作，都是同一个链接下，也就保证了事务的特性】
-            dbRouter.doRouter(createQuotaOrderAggregate.getUserId());
-
-            // 编程式事务
-            transactionTemplate.execute(status -> {
-                try {
-                    raffleActivityOrderDao.insert(raffleActivityOrder);
-                    return 1;
-                } catch (DuplicateKeyException e) {
-                    status.setRollbackOnly();
-                    log.error("写入订单记录，唯一索引冲突 userId: {} activityId: {} sku: {}", activityOrderEntity.getUserId(), activityOrderEntity.getActivityId(), activityOrderEntity.getSku(), e);
-                    throw new AppException(ResponseCode.INDEX_DUP.getCode(), e);
-                }
-            });
-        } finally {
-            dbRouter.clear();
-        }
+    public UnpaidActivityOrderEntity queryUnpaidActivityOrder(SkuRechargeEntity skuRechargeEntity) {
+        RaffleActivityOrder raffleActivityOrderReq = new RaffleActivityOrder();
+        raffleActivityOrderReq.setUserId(skuRechargeEntity.getUserId());
+        raffleActivityOrderReq.setSku(skuRechargeEntity.getSku());
+        RaffleActivityOrder raffleActivityOrderRes = raffleActivityOrderDao.queryUnpaidActivityOrder(raffleActivityOrderReq);
+        if (null == raffleActivityOrderRes) return null;
+        return UnpaidActivityOrderEntity.builder()
+                .userId(raffleActivityOrderRes.getUserId())
+                .orderId(raffleActivityOrderRes.getOrderId())
+                .outBusinessNo(raffleActivityOrderRes.getOutBusinessNo())
+                .payAmount(raffleActivityOrderRes.getPayAmount())
+                .build();
 
     }
+
+    @Override
+    public List<SkuProductEntity> querySkuProductEntityListByActivityId(Long activityId) {
+        List<RaffleActivitySku> raffleActivitySkus = raffleActivitySkuDao.queryActivitySkuListByActivityId(activityId);
+        List<SkuProductEntity> skuProductEntities = new ArrayList<>(raffleActivitySkus.size());
+        for (RaffleActivitySku raffleActivitySku : raffleActivitySkus) {
+            RaffleActivityCount raffleActivityCount = raffleActivityCountDao.queryRaffleActivityCountByActivityCountId(raffleActivitySku.getActivityCountId());
+
+            SkuProductEntity.ActivityCount activityCount = new SkuProductEntity.ActivityCount();
+            activityCount.setTotalCount(raffleActivityCount.getTotalCount());
+            activityCount.setMonthCount(raffleActivityCount.getMonthCount());
+            activityCount.setDayCount(raffleActivityCount.getDayCount());
+
+            skuProductEntities.add(SkuProductEntity.builder()
+                    .sku(raffleActivitySku.getSku())
+                    .activityId(raffleActivitySku.getActivityId())
+                    .activityCountId(raffleActivitySku.getActivityCountId())
+                    .stockCount(raffleActivitySku.getStockCount())
+                    .stockCountSurplus(raffleActivitySku.getStockCountSurplus())
+                    .productAmount(raffleActivitySku.getProductAmount())
+                    .activityCount(activityCount)
+                    .build());
+
+        }
+        return skuProductEntities;
+    }
+
+
 
 }
